@@ -1,37 +1,38 @@
 <?php
 
-$problem1 = (object)[
-    'task' => 'Напишите программу, которая вычисляет следующее выражение: x*y+y*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
-    'cases' => [
-        (object)[
-            'input' => ['x' => 1, 'y' => 2, 'z' => 3],
-            'output' => [8],
-        ],
-        (object)[
-            'input' => ['x' => -23265345, 'y' => 32875768, 'z' => -48229756],
-            'output' => [-2350456353612568],
-        ],
-        (object)[
-            'input' => ['x' => 176837.632274, 'y' => -28835.8347382, 'z' => -87893.97492],
-            'output' => [-2564764604.471031],
+$problems = [
+    (object)[
+        'task' => 'Напишите программу, которая вычисляет следующее выражение: x*y+y*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
+        'cases' => [
+            (object)[
+                'input' => ['x' => 1, 'y' => 2, 'z' => 3],
+                'output' => [8],
+            ],
+            (object)[
+                'input' => ['x' => -23265345, 'y' => 32875768, 'z' => -48229756],
+                'output' => [-2350456353612568],
+            ],
+            (object)[
+                'input' => ['x' => 176837.632274, 'y' => -28835.8347382, 'z' => -87893.97492],
+                'output' => [-2564764604.471031],
+            ]
         ]
-    ]
-];
-
-$problem2 = (object)[
-    'task' => 'Напишите программу, которая вычисляет следующее выражение: (x*y+y)*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
-    'cases' => [
-        (object)[
-            'input' => ['x' => 1, 'y' => 2, 'z' => 3],
-            'output' => [12],
-        ],
-        (object)[
-            'input' => ['x' => -232345, 'y' => 328768, 'z' => -482756],
-            'output' => [36876413974321152],
-        ],
-        (object)[
-            'input' => ['x' => 1737.6374, 'y' => -2835.8382, 'z' => -8793.9742],
-            'output' => [43358640149.96082],
+    ],
+    (object)[
+        'task' => 'Напишите программу, которая вычисляет следующее выражение: (x*y+y)*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
+        'cases' => [
+            (object)[
+                'input' => ['x' => 1, 'y' => 2, 'z' => 3],
+                'output' => [12],
+            ],
+            (object)[
+                'input' => ['x' => -232345, 'y' => 328768, 'z' => -482756],
+                'output' => [36876413974321152],
+            ],
+            (object)[
+                'input' => ['x' => 1737.6374, 'y' => -2835.8382, 'z' => -8793.9742],
+                'output' => [43358640149.96082],
+            ]
         ]
     ]
 ];
@@ -58,7 +59,14 @@ function printUsage()
     echo "  " . OptionEnum::FILE->value . ", " . OptionEnum::FILE_LONG->value . "      Name of the file with solution\n";
 }
 
-function parseArguments(int $argc, array $argv): array
+function printProblems(array $problems)
+{
+    foreach ($problems as $idx => $problem) {
+        echo sprintf("[%d] %s" . PHP_EOL, $idx, $problem->task);
+    }
+}
+
+function parseArguments(int $argc, array $argv, array $problems): array
 {
     if ($argc < 2) {
         printUsage();
@@ -73,6 +81,7 @@ function parseArguments(int $argc, array $argv): array
             case OptionEnum::PROBLEMS->value:
             case OptionEnum::PROBLEMS_LONG->value:
                 echo "Available problems:" . PHP_EOL;
+                printProblems($problems);
                 exit(0);
             case OptionEnum::NUMBER->value:
             case OptionEnum::NUMBER_LONG->value:
@@ -99,13 +108,13 @@ function parseArguments(int $argc, array $argv): array
         }
     }
 
-    if (empty($number)) {
+    if (!isset($number)) {
         echo "Error: missing number argument." . PHP_EOL;
         printUsage();
         exit(1);
     }
 
-    if (empty($file)) {
+    if (!isset($file)) {
         echo "Error: missing file argument." . PHP_EOL;
         printUsage();
         exit(1);
@@ -144,9 +153,6 @@ function checkSolution(string $file, object $problem): void
     }
 }
 
-//checkSolution('solution1.txt', $problem1);
-//
-//checkSolution('solution2.txt', $problem2);
 
-
-parseArguments($argc, $argv);
+[$number, $file] = parseArguments($argc, $argv, $problems);
+checkSolution($file, $problems[$number]);
