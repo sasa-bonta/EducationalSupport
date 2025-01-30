@@ -59,14 +59,15 @@ function printUsage()
     echo "  " . OptionEnum::FILE->value . ", " . OptionEnum::FILE_LONG->value . "      Name of the file with solution\n";
 }
 
-function printProblems(array $problems)
+function printProblems()
 {
+    global $problems;
     foreach ($problems as $idx => $problem) {
         echo sprintf("[%d] %s" . PHP_EOL, $idx, $problem->task);
     }
 }
 
-function parseArguments(int $argc, array $argv, array $problems): array
+function parseArguments(int $argc, array $argv): array
 {
     if ($argc < 2) {
         printUsage();
@@ -81,7 +82,7 @@ function parseArguments(int $argc, array $argv, array $problems): array
             case OptionEnum::PROBLEMS->value:
             case OptionEnum::PROBLEMS_LONG->value:
                 echo "Available problems:" . PHP_EOL;
-                printProblems($problems);
+                printProblems();
                 exit(0);
             case OptionEnum::NUMBER->value:
             case OptionEnum::NUMBER_LONG->value:
@@ -123,7 +124,6 @@ function parseArguments(int $argc, array $argv, array $problems): array
     return [$number, $file];
 }
 
-
 function checkSolution(string $file, object $problem): void
 {
     $code = file_get_contents($file);
@@ -153,6 +153,5 @@ function checkSolution(string $file, object $problem): void
     }
 }
 
-
-[$number, $file] = parseArguments($argc, $argv, $problems);
+[$number, $file] = parseArguments($argc, $argv);
 checkSolution($file, $problems[$number]);
