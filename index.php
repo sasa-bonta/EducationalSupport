@@ -1,41 +1,6 @@
 <?php
 
-$problems = [
-    (object)[
-        'task' => 'Напишите программу, которая вычисляет следующее выражение: x*y+y*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
-        'cases' => [
-            (object)[
-                'input' => ['x' => 1, 'y' => 2, 'z' => 3],
-                'output' => [8],
-            ],
-            (object)[
-                'input' => ['x' => -23265345, 'y' => 32875768, 'z' => -48229756],
-                'output' => [-2350456353612568],
-            ],
-            (object)[
-                'input' => ['x' => 176837.632274, 'y' => -28835.8347382, 'z' => -87893.97492],
-                'output' => [-2564764604.471031],
-            ]
-        ]
-    ],
-    (object)[
-        'task' => 'Напишите программу, которая вычисляет следующее выражение: (x*y+y)*z. Текущие значения вещественных переменных x, y и z считываются с клавиатуры.',
-        'cases' => [
-            (object)[
-                'input' => ['x' => 1, 'y' => 2, 'z' => 3],
-                'output' => [12],
-            ],
-            (object)[
-                'input' => ['x' => -232345, 'y' => 328768, 'z' => -482756],
-                'output' => [36876413974321152],
-            ],
-            (object)[
-                'input' => ['x' => 1737.6374, 'y' => -2835.8382, 'z' => -8793.9742],
-                'output' => [43358640149.96082],
-            ]
-        ]
-    ]
-];
+$problems = require "./problems.php";
 
 enum OptionEnum: string
 {
@@ -63,7 +28,7 @@ function printProblems()
 {
     global $problems;
     foreach ($problems as $idx => $problem) {
-        echo sprintf("[%d] %s" . PHP_EOL, $idx, $problem->task);
+        print(sprintf("[%d] %s" . PHP_EOL, $idx, $problem->task));
     }
 }
 
