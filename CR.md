@@ -27,8 +27,8 @@ $application = new Application(...);
 $application->handle('passord:list');
 ```
 - [ ] add a command to create problems
-- [ ] add command to sublit solutions (not check, but submit, save into a file)
-- [ ] add possibility to list solutions and select one for a run
+- [ ] add command to submit solutions (not check, but submit, save into a file) (solution:submit)
+- [ ] add possibility to list solutions (solution:list) and select one for a run (solution:run)
 - [ ] don't use stdClass objects
 - [ ] store problems in a json file
 
