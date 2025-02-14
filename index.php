@@ -60,7 +60,7 @@ function checkSolution(string $file, array $problem): string
         $resultToDisplay .= 'Testing case nb.' . $idx + 1 . ' with: ';
         foreach ($case['input'] as $var => $value) {
             ${$var} = $value;
-            $resultToDisplay .=  '$' . $var . '=' . $value . ' ';
+            $resultToDisplay .= '$' . $var . '=' . $value . ' ';
         }
 
         $result = eval('?>' . $code);
