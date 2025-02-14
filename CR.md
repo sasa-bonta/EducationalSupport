@@ -27,10 +27,10 @@ $application = new Application(...);
 $application->handle('passord:list');
 ```
 - [ ] add a command to create problems
-- [ ] add command to submit solutions (not check, but submit, save into a file) (solution:submit)
+- [x] add command to submit solutions (not check, but submit, save into a file) (solution:submit)
 - [ ] add possibility to list solutions (solution:list) and select one for a run (solution:run)
-- [ ] don't use stdClass objects
-- [ ] store problems in a json file
+- [x] don't use stdClass objects
+- [x] store problems in a json file
 
 ## Later
 - [ ] add categories of problems (one folder - one category, one file - one problem)

@@ -16,6 +16,7 @@ function readProblemsFile(string $fileName): void
     $file = fopen($fileName, "r") or die("Unable to open file!");
     $problemsJson = fread($file, filesize($fileName));
     $problems = json_decode($problemsJson, true);
+    fclose($file);
 }
 
 function printUsage()
@@ -44,6 +45,66 @@ function printProblems()
     }
 }
 
+function checkSolution(string $file, array $problem): string
+{
+    $code = file_get_contents($file);
+
+    if ($code === false) {
+        die("Error reading the file.");
+    }
+
+    $code = '<?php' . PHP_EOL . $code;
+
+    $resultToDisplay = '';
+    foreach ($problem['cases'] as $idx => $case) {
+        $resultToDisplay .= 'Testing case nb.' . $idx + 1 . ' with: ';
+        foreach ($case['input'] as $var => $value) {
+            ${$var} = $value;
+            $resultToDisplay .=  '$' . $var . '=' . $value . ' ';
+        }
+
+        $result = eval('?>' . $code);
+
+        if ($result === $case['output'][0]) {
+            $resultToDisplay .= ' ✅ ';
+        } else {
+            $resultToDisplay .= ' ❌ Expected: ' . $case['output'][0] . " Actual: $result";
+        }
+
+        $resultToDisplay .= PHP_EOL;
+    }
+
+    return $resultToDisplay;
+}
+
+function submitSolution(string $file, array $problem): void
+{
+    $fileName = './storage/solutions/' . date("Y-m-d h:i:s") . '.txt';
+    $submissionFile = fopen($fileName, "w");
+    $txt = 'Task:' . PHP_EOL;
+    $txt .= $problem['task'] . PHP_EOL . PHP_EOL . PHP_EOL;
+    $txt .= 'Code:' . PHP_EOL;
+    $txt .= file_get_contents($file);
+    $txt .= PHP_EOL . PHP_EOL . PHP_EOL;
+    $txt .= 'Result: ' . PHP_EOL;
+    $txt .= checkSolution($file, $problem);
+    fwrite($submissionFile, $txt);
+    fclose($submissionFile);
+}
+
+function checkRequiredOptions($options): void
+{
+    if (!isset($options[OptionEnum::NUMBER->value])) {
+        echo "‼️ Error: missing number argument." . PHP_EOL;
+        exit(1);
+    }
+
+    if (!isset($options[OptionEnum::FILE->value])) {
+        echo "‼️ Error: missing file argument." . PHP_EOL;
+        exit(1);
+    }
+}
+
 function parseArguments(int $argc, array $argv): void
 {
     $commandOptions = [];
@@ -66,53 +127,18 @@ function parseArguments(int $argc, array $argv): void
         case CommandEnum::SOLUTION_RUN->value:
             readProblemsFile("./storage/problems/problems.json");
             global $problems;
-
-            if (!isset($commandOptions[OptionEnum::NUMBER->value])) {
-                echo "‼️ Error: missing number argument." . PHP_EOL;
-                exit(1);
-            }
-
-            if (!isset($commandOptions[OptionEnum::FILE->value])) {
-                echo "‼️ Error: missing file argument." . PHP_EOL;
-                exit(1);
-            }
-
-            checkSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
+            checkRequiredOptions($commandOptions);
+            echo checkSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
             exit(0);
         case CommandEnum::SOLUTION_SUBMIT->value:
+            readProblemsFile("./storage/problems/problems.json");
+            global $problems;
+            checkRequiredOptions($commandOptions);
+            submitSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
+            exit(0);
         default:
             exit(1);
     }
 }
-
-function checkSolution(string $file, array $problem): void
-{
-    $code = file_get_contents($file);
-
-    if ($code === false) {
-        die("Error reading the file.");
-    }
-
-    $code = '<?php' . PHP_EOL . $code;
-
-    foreach ($problem['cases'] as $idx => $case) {
-        echo 'Testing case nb.' . $idx + 1 . ' with: ';
-        foreach ($case['input'] as $var => $value) {
-            ${$var} = $value;
-            echo '$' . $var . '=' . $value . ' ';
-        }
-
-        $result = eval('?>' . $code);
-
-        if ($result === $case['output'][0]) {
-            echo ' ✅ ';
-        } else {
-            echo ' ❌ Expected: ' . $case['output'][0] . " Actual: $result";
-        }
-
-        echo PHP_EOL;
-    }
-}
-
 
 parseArguments($argc, $argv);
