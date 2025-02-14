@@ -27,7 +27,7 @@ function printProblems()
 {
     global $problems;
     foreach ($problems as $idx => $problem) {
-        print(sprintf("[%d] %s" . PHP_EOL, $idx, $problem->task));
+        print(sprintf("[%d] %s" . PHP_EOL, $idx, $problem['task']));
     }
 }
 
@@ -70,7 +70,7 @@ function parseArguments(int $argc, array $argv): void
     }
 }
 
-function checkSolution(string $file, object $problem): void
+function checkSolution(string $file, array $problem): void
 {
     $code = file_get_contents($file);
 
@@ -80,19 +80,19 @@ function checkSolution(string $file, object $problem): void
 
     $code = '<?php' . PHP_EOL . $code;
 
-    foreach ($problem->cases as $idx => $case) {
+    foreach ($problem['cases'] as $idx => $case) {
         echo 'Testing case nb.' . $idx + 1 . ' with: ';
-        foreach ($case->input as $var => $value) {
+        foreach ($case['input'] as $var => $value) {
             ${$var} = $value;
             echo '$' . $var . '=' . $value . ' ';
         }
 
         $result = eval('?>' . $code);
 
-        if ($result === $case->output[0]) {
+        if ($result === $case['output'][0]) {
             echo ' ✅ ';
         } else {
-            echo ' ❌ Expected: ' . $case->output[0] . " Actual: $result";
+            echo ' ❌ Expected: ' . $case['output'][0] . " Actual: $result";
         }
 
         echo PHP_EOL;
