@@ -1,9 +1,22 @@
 <?php
 
-$problems = require "./problems.php";
+$problems = [];
 require './src/Enums/CommandEnum.php';
 require './src/Enums/OptionEnum.php';
 const CURRENT_FILE = 'index.php';
+
+function readProblemsFile(string $fileName): void
+{
+    global $problems;
+
+    if (!empty($problems)) {
+        return;
+    }
+
+    $file = fopen($fileName, "r") or die("Unable to open file!");
+    $problemsJson = fread($file, filesize($fileName));
+    $problems = json_decode($problemsJson, true);
+}
 
 function printUsage()
 {
@@ -47,9 +60,11 @@ function parseArguments(int $argc, array $argv): void
 
     switch ($commandOptions[CURRENT_FILE]) {
         case CommandEnum::PROBLEMS_LIST->value:
+            readProblemsFile("./storage/problems/problems.json");
             printProblems();
             exit(0);
         case CommandEnum::SOLUTION_RUN->value:
+            readProblemsFile("./storage/problems/problems.json");
             global $problems;
 
             if (!isset($commandOptions[OptionEnum::NUMBER->value])) {
