@@ -1,27 +1,26 @@
 <?php
 
 $problems = require "./problems.php";
-
-enum OptionEnum: string
-{
-    case HELP = '-h';
-    case HELP_LONG = '--help';
-    case PROBLEMS = '-p';
-    case PROBLEMS_LONG = '--problems';
-    case NUMBER = '-n';
-    case NUMBER_LONG = '--number';
-    case FILE = '-f';
-    case FILE_LONG = '--file';
-}
+require './src/Enums/CommandEnum.php';
+require './src/Enums/OptionEnum.php';
+const CURRENT_FILE = 'index.php';
 
 function printUsage()
 {
-    echo "Usage: php index.php [options]\n";
-    echo "Options:\n";
-    echo "  " . OptionEnum::HELP->value . ", " . OptionEnum::HELP_LONG->value . "      Show this help message\n";
-    echo "  " . OptionEnum::PROBLEMS->value . ", " . OptionEnum::PROBLEMS_LONG->value . "  Show available problems\n";
-    echo "  " . OptionEnum::NUMBER->value . ", " . OptionEnum::NUMBER_LONG->value . "    Specify number of solved problem\n";
-    echo "  " . OptionEnum::FILE->value . ", " . OptionEnum::FILE_LONG->value . "      Name of the file with solution\n";
+    echo "##########################################################################################################" . PHP_EOL;
+    echo "#######################################   EDUCATION SUPPORT DEMO   #######################################" . PHP_EOL;
+    echo "##########################################################################################################" . PHP_EOL;
+    echo "Usage: php index.php <command> <arguments[]>" . PHP_EOL;
+    echo "Commands:" . PHP_EOL;
+    echo "👉" . CommandEnum::PROBLEMS_LIST->value . " : show available problems" . PHP_EOL;
+    echo "👉" . CommandEnum::SOLUTION_RUN->value . " : run a solution" . PHP_EOL;
+    echo "  Arguments:" . PHP_EOL;
+    echo "  🚩" . OptionEnum::NUMBER->value . "    Specify number of solved problem\n";
+    echo "  🚩" . OptionEnum::FILE->value . "      Name of the file with solution\n";
+    echo CommandEnum::SOLUTION_SUBMIT->value . " : submit a solution" . PHP_EOL;
+    echo "  Arguments:" . PHP_EOL;
+    echo "  🚩" . OptionEnum::NUMBER->value . "    Specify number of solved problem\n";
+    echo "  🚩" . OptionEnum::FILE->value . "      Name of the file with solution\n";
 }
 
 function printProblems()
@@ -32,61 +31,43 @@ function printProblems()
     }
 }
 
-function parseArguments(int $argc, array $argv): array
+function parseArguments(int $argc, array $argv): void
 {
-    if ($argc < 2) {
-        printUsage();
-    }
-
-    for ($i = 1; $i < $argc; $i++) {
-        switch ($argv[$i]) {
-            case OptionEnum::HELP->value:
-            case OptionEnum::HELP_LONG->value:
-                printUsage();
-                exit(0);
-            case OptionEnum::PROBLEMS->value:
-            case OptionEnum::PROBLEMS_LONG->value:
-                echo "Available problems:" . PHP_EOL;
-                printProblems();
-                exit(0);
-            case OptionEnum::NUMBER->value:
-            case OptionEnum::NUMBER_LONG->value:
-                if (isset($argv[$i + 1])) {
-                    $number = $argv[++$i];
-                } else {
-                    echo "Error: Option '-n' requires an argument." . PHP_EOL;
-                    exit(1);
-                }
-                break;
-            case OptionEnum::FILE->value:
-            case OptionEnum::FILE_LONG->value:
-                if (isset($argv[$i + 1])) {
-                    $file = $argv[++$i];
-                } else {
-                    echo "Error: Option '-f' requires an argument." . PHP_EOL;
-                    exit(1);
-                }
-                break;
-            default:
-                echo "Error: Unknown option '{$argv[$i]}'." . PHP_EOL;
-                printUsage();
-                exit(1);
+    $commandOptions = [];
+    for ($i = 0; $i < $argc; $i += 2) {
+        if (isset($argv[$i + 1])) {
+            $commandOptions[$argv[$i]] = $argv[$i + 1];
         }
     }
 
-    if (!isset($number)) {
-        echo "Error: missing number argument." . PHP_EOL;
+    if (empty($commandOptions[CURRENT_FILE])) {
         printUsage();
-        exit(1);
+        exit(0);
     }
 
-    if (!isset($file)) {
-        echo "Error: missing file argument." . PHP_EOL;
-        printUsage();
-        exit(1);
-    }
+    switch ($commandOptions[CURRENT_FILE]) {
+        case CommandEnum::PROBLEMS_LIST->value:
+            printProblems();
+            exit(0);
+        case CommandEnum::SOLUTION_RUN->value:
+            global $problems;
 
-    return [$number, $file];
+            if (!isset($commandOptions[OptionEnum::NUMBER->value])) {
+                echo "‼️ Error: missing number argument." . PHP_EOL;
+                exit(1);
+            }
+
+            if (!isset($commandOptions[OptionEnum::FILE->value])) {
+                echo "‼️ Error: missing file argument." . PHP_EOL;
+                exit(1);
+            }
+
+            checkSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
+            exit(0);
+        case CommandEnum::SOLUTION_SUBMIT->value:
+        default:
+            exit(1);
+    }
 }
 
 function checkSolution(string $file, object $problem): void
@@ -118,5 +99,5 @@ function checkSolution(string $file, object $problem): void
     }
 }
 
-[$number, $file] = parseArguments($argc, $argv);
-checkSolution($file, $problems[$number]);
+
+parseArguments($argc, $argv);
