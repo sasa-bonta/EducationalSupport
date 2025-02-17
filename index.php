@@ -4,6 +4,7 @@ $problems = [];
 require './src/Enums/CommandEnum.php';
 require './src/Enums/OptionEnum.php';
 const CURRENT_FILE = 'index.php';
+const SOLUTIONS_DIRECTORY = './storage/solutions/';
 
 function readProblemsFile(string $fileName): void
 {
@@ -79,16 +80,14 @@ function checkSolution(string $file, array $problem): string
 
 function submitSolution(string $file, array $problem): void
 {
-    $fileName = './storage/solutions/' . date("Y-m-d h:i:s") . '.txt';
+    $fileName = SOLUTIONS_DIRECTORY . date("Y-m-d h:i:s") . '.json';
     $submissionFile = fopen($fileName, "w");
-    $txt = 'Task:' . PHP_EOL;
-    $txt .= $problem['task'] . PHP_EOL . PHP_EOL . PHP_EOL;
-    $txt .= 'Code:' . PHP_EOL;
-    $txt .= file_get_contents($file);
-    $txt .= PHP_EOL . PHP_EOL . PHP_EOL;
-    $txt .= 'Result: ' . PHP_EOL;
-    $txt .= checkSolution($file, $problem);
-    fwrite($submissionFile, $txt);
+    $solution = [
+        'task' => $problem['task'],
+        'code' => file_get_contents($file),
+        'result' => checkSolution($file, $problem),
+    ];
+    fwrite($submissionFile, json_encode($solution, JSON_PRETTY_PRINT));
     fclose($submissionFile);
 }
 
@@ -102,6 +101,22 @@ function checkRequiredOptions($options): void
     if (!isset($options[OptionEnum::FILE->value])) {
         echo "‼️ Error: missing file argument." . PHP_EOL;
         exit(1);
+    }
+}
+
+function listSolutions(): void
+{
+    $files = scandir(SOLUTIONS_DIRECTORY);
+    unset($files[0], $files[1]); // remove directories . and ..
+    foreach ($files as $fileName) {
+        $solutionFile = fopen(SOLUTIONS_DIRECTORY . $fileName, "r") or die("Unable to open file!");
+        $solution = fread($solutionFile, filesize(SOLUTIONS_DIRECTORY . $fileName));
+        $solution = json_decode($solution, true);
+        fclose($solutionFile);
+        echo '########################   solution submited on [' . $fileName . '] ########################' . PHP_EOL;
+        echo $solution['task'] . PHP_EOL;
+        echo $solution['code'] . PHP_EOL;
+        echo $solution['result'] . PHP_EOL;
     }
 }
 
@@ -135,6 +150,9 @@ function parseArguments(int $argc, array $argv): void
             global $problems;
             checkRequiredOptions($commandOptions);
             submitSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
+            exit(0);
+        case CommandEnum::SOLUTION_LIST->value:
+            listSolutions();
             exit(0);
         default:
             exit(1);
