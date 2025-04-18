@@ -5,6 +5,8 @@ require './src/Enums/CommandEnum.php';
 require './src/Enums/OptionEnum.php';
 const CURRENT_FILE = 'index.php';
 const SOLUTIONS_DIRECTORY = './storage/solutions/';
+const PHP_START_TAG = '<?php';
+const PHP_END_TAG = '?>';
 
 function readProblemsFile(string $fileName): void
 {
@@ -28,6 +30,7 @@ function printUsage()
     echo "Usage: php index.php <command> <arguments[]>" . PHP_EOL;
     echo "Commands:" . PHP_EOL;
     echo "👉" . CommandEnum::PROBLEMS_LIST->value . " : show available problems" . PHP_EOL;
+    echo "👉" . CommandEnum::SOLUTION_LIST->value . " : show solutions" . PHP_EOL;
     echo "👉" . CommandEnum::SOLUTION_RUN->value . " : run a solution" . PHP_EOL;
     echo "  Arguments:" . PHP_EOL;
     echo "  🚩" . OptionEnum::NUMBER->value . "    Specify number of solved problem\n";
@@ -46,7 +49,7 @@ function printProblems()
     }
 }
 
-function checkSolution(string $file, array $problem): string
+function getCodeFromFile(string $file): string
 {
     $code = file_get_contents($file);
 
@@ -54,7 +57,12 @@ function checkSolution(string $file, array $problem): string
         die("Error reading the file.");
     }
 
-    $code = '<?php' . PHP_EOL . $code;
+    return $code;
+}
+
+function runSolution(string $code, array $problem): string
+{
+    $code = PHP_START_TAG . PHP_EOL . $code;
 
     $resultToDisplay = '';
     foreach ($problem['cases'] as $idx => $case) {
@@ -64,7 +72,7 @@ function checkSolution(string $file, array $problem): string
             $resultToDisplay .= '$' . $var . '=' . $value . ' ';
         }
 
-        $result = eval('?>' . $code);
+        $result = eval(PHP_END_TAG . $code);
 
         if ($result === $case['output'][0]) {
             $resultToDisplay .= ' ✅ ';
@@ -82,10 +90,11 @@ function submitSolution(string $file, array $problem): void
 {
     $fileName = SOLUTIONS_DIRECTORY . date("Y-m-d h:i:s") . '.json';
     $submissionFile = fopen($fileName, "w");
+    $code = getCodeFromFile($fileName);
     $solution = [
         'task' => $problem['task'],
         'code' => file_get_contents($file),
-        'result' => checkSolution($file, $problem),
+        'result' => runSolution($code, $problem),
     ];
     fwrite($submissionFile, json_encode($solution, JSON_PRETTY_PRINT));
     fclose($submissionFile);
@@ -113,10 +122,28 @@ function listSolutions(): void
         $solution = fread($solutionFile, filesize(SOLUTIONS_DIRECTORY . $fileName));
         $solution = json_decode($solution, true);
         fclose($solutionFile);
-        echo '########################   solution submited on [' . $fileName . '] ########################' . PHP_EOL;
+        echo '########################   solution submitted on [' . $fileName . '] ########################' . PHP_EOL;
         echo $solution['task'] . PHP_EOL;
         echo $solution['code'] . PHP_EOL;
         echo $solution['result'] . PHP_EOL;
+    }
+}
+
+function checkSolution(string $fileName, array $problem): void
+{
+    $solutionFile = fopen(SOLUTIONS_DIRECTORY . $fileName, "r") or die("Unable to open file!");
+    $solution = fread($solutionFile, filesize(SOLUTIONS_DIRECTORY . $fileName));
+    $solution = json_decode($solution, true);
+    fclose($solutionFile);
+    echo '########################   checking submitted solution : [' . $fileName . '] ########################' . PHP_EOL;
+
+    if (strcmp($solution['task'], $problem['task']) !== 0) {
+        echo '‼️ tasks differ' . PHP_EOL;
+        echo "  👉 solution's task: " . $solution['task'] . PHP_EOL;
+        echo "  👉 task's task:     " . $problem['task'] . PHP_EOL;
+    } else {
+        echo $solution['task'] . PHP_EOL . PHP_EOL;
+        echo runSolution($solution['code'], $problem);
     }
 }
 
@@ -134,25 +161,28 @@ function parseArguments(int $argc, array $argv): void
         exit(0);
     }
 
+    readProblemsFile("./storage/problems/problems.json");
+    global $problems;
+
     switch ($commandOptions[CURRENT_FILE]) {
         case CommandEnum::PROBLEMS_LIST->value:
-            readProblemsFile("./storage/problems/problems.json");
             printProblems();
             exit(0);
         case CommandEnum::SOLUTION_RUN->value:
-            readProblemsFile("./storage/problems/problems.json");
-            global $problems;
             checkRequiredOptions($commandOptions);
-            echo checkSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
+            $code = getCodeFromFile($commandOptions[OptionEnum::FILE->value]);
+            echo runSolution($code, $problems[$commandOptions[OptionEnum::NUMBER->value]]);
             exit(0);
         case CommandEnum::SOLUTION_SUBMIT->value:
-            readProblemsFile("./storage/problems/problems.json");
-            global $problems;
             checkRequiredOptions($commandOptions);
             submitSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
             exit(0);
         case CommandEnum::SOLUTION_LIST->value:
             listSolutions();
+            exit(0);
+        case CommandEnum::SOLUTION_CHECK->value:
+            checkRequiredOptions($commandOptions);
+            checkSolution($commandOptions[OptionEnum::FILE->value], $problems[$commandOptions[OptionEnum::NUMBER->value]]);
             exit(0);
         default:
             exit(1);
