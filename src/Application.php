@@ -6,7 +6,7 @@ use src\Command\AbstractCommand;
 
 class Application
 {
-    /** @var array<string, AbstractCommand>  */
+    /** @var array<string, AbstractCommand> */
     private array $commands = [];
 
     public function registerCommand(AbstractCommand $command): void
@@ -18,16 +18,20 @@ class Application
     {
         /** @var string $commandName */
         $commandName = $argv[1];
-        if ($command = $this->commands[$commandName] ?? null) {
-            $command->configure();
-            try {
+        try {
+            if ($command = $this->commands[$commandName] ?? null) {
+                $command->configure();
                 $command->parseArguments($argc, $argv);
                 $command->handle();
-            } catch (\Throwable $exception) {
-                echo sprintf("\e[1;37;42m%s\e[0m\n", $exception->getMessage());
+            } else {
+                if (!$commandName) {
+                    throw new \Exception('No command specified.');
+                } else {
+                    throw new \Exception('Command does not exist.');
+                }
             }
-        } else {
-            echo 'No command specified.' . PHP_EOL;
+        } catch (\Throwable $exception) {
+            echo sprintf("\e[1;37;42m%s\e[0m\n", $exception->getMessage());
         }
     }
 }

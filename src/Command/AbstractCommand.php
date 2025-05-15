@@ -13,6 +13,9 @@ abstract class AbstractCommand
 
     abstract public function configure(): void;
 
+    /**
+     * @throws \Exception
+     */
     abstract public function handle(): void;
 
     public function getCommandName(): string
@@ -33,6 +36,9 @@ abstract class AbstractCommand
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getOption(string $name): string|int|null
     {
         if ($option = $this->options[$name] ?? null) {
@@ -45,6 +51,9 @@ abstract class AbstractCommand
         throw new \Exception("Argument option '{$name}' is doesn't exist.");
     }
 
+    /**
+     * @throws \Exception
+     */
     public function parseArguments(int $argc, array $argv): void
     {
         for ($i = 0; $i < $argc; $i += 2) {
