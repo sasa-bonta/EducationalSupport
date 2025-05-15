@@ -34,16 +34,14 @@ abstract class AbstractCommand
 
     public function getOption(string $name): string|int|null
     {
-        foreach ($this->options as $option) {
-            if ($option->name === $name) {
+        if ($option = $this->options[$name] ?? null) {
                 return match ($option->type) {
                     InputTypeEnum::STRING => (string) $option->value,
                     InputTypeEnum::INT => (int) $option->value,
                 };
-            }
         }
 
-        return null;
+        throw new \Exception("Argument option '{$name}' is doesn't exist");
     }
 
     public function parseArguments(int $argc, array $argv): void

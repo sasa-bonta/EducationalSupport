@@ -23,7 +23,7 @@ class ShowProblemsCommand extends AbstractCommand
      */
     public function handle(): void
     {
-        echo 'test';
+        echo $this->getOption('test');
         // TODO: Implement handle() method.
     }
 }

@@ -19,7 +19,11 @@ class Application
         if ($command = $this->commands[$commandName] ?? null) {
             $command->configure();
             $command->parseArguments($argc, $argv);
-            $command->handle();
+            try {
+                $command->handle();
+            } catch (\Throwable $exception) {
+                echo sprintf("\e[1;37;42m%s\e[0m\n", $exception->getMessage());
+            }
         } else {
             echo 'No command specified.' . PHP_EOL;
         }
