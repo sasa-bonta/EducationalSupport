@@ -2,6 +2,8 @@
 
 namespace src;
 
+use src\Command\AbstractCommand;
+
 class Application
 {
     /** @var array<string, AbstractCommand>  */

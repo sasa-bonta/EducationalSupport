@@ -1,8 +1,9 @@
 <?php
 
-namespace src;
+namespace src\Command;
 
 use src\Enums\InputTypeEnum;
+use src\InputOption;
 
 abstract class AbstractCommand
 {
