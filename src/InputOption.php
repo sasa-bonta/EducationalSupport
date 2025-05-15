@@ -11,7 +11,8 @@ class InputOption
         public string        $shortcut,
         public InputTypeEnum $type,
         public string        $description,
-        public string|int|null        $value,
+        public bool          $required,
+        public string|int|null        $value = null,
     )
     {
     }

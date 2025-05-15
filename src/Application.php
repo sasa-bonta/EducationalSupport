@@ -18,8 +18,8 @@ class Application
         $commandName = $argv[1];
         if ($command = $this->commands[$commandName] ?? null) {
             $command->configure();
-            $command->parseArguments($argc, $argv);
             try {
+                $command->parseArguments($argc, $argv);
                 $command->handle();
             } catch (\Throwable $exception) {
                 echo sprintf("\e[1;37;42m%s\e[0m\n", $exception->getMessage());

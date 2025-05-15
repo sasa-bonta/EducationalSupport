@@ -14,7 +14,8 @@ class ShowProblemsCommand extends AbstractCommand
             'problemNumber',
             'n',
             InputTypeEnum::INT,
-            'Number of problems to show'
+            'Number of problems to show',
+            true
         );
     }
 
@@ -23,7 +24,7 @@ class ShowProblemsCommand extends AbstractCommand
      */
     public function handle(): void
     {
-        echo $this->getOption('test');
+        echo $this->getOption('problemNumber');
         // TODO: Implement handle() method.
     }
 }

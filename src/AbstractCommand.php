@@ -19,14 +19,14 @@ abstract class AbstractCommand
         return $this->commandName;
     }
 
-    public function addOption(string $name, string $shortCut, InputTypeEnum $type, string $description): self
+    public function addOption(string $name, string $shortCut, InputTypeEnum $type, string $description, bool $required = false): self
     {
         $this->options[$name] = new InputOption(
             $name,
             $shortCut,
             $type,
             $description,
-            null
+            $required
         );
 
         return $this;
@@ -41,7 +41,7 @@ abstract class AbstractCommand
                 };
         }
 
-        throw new \Exception("Argument option '{$name}' is doesn't exist");
+        throw new \Exception("Argument option '{$name}' is doesn't exist.");
     }
 
     public function parseArguments(int $argc, array $argv): void
@@ -52,6 +52,12 @@ abstract class AbstractCommand
                     $this->options[$option->name]->value = $argv[$i + 1];
                 }
             }
+        }
+
+        $emptyRequiredOptions = array_filter($this->options, fn (InputOption $option) => $option->required === true && $option->value === null);
+
+        foreach ($emptyRequiredOptions as $option) {
+            throw new \Exception(sprintf("Option '%s' cannot be empty.", $option->name));
         }
     }
 
