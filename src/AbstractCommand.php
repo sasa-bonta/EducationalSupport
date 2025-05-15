@@ -7,15 +7,10 @@ use src\Enums\InputTypeEnum;
 abstract class AbstractCommand
 {
     protected string $commandName;
-    /** @var InputOption[] */
+    /** @var array<string, InputOption> */
     private array $options = [];
 
-    public function __construct()
-    {
-        $this->configure();
-    }
-
-    abstract protected function configure(): void;
+    abstract public function configure(): void;
 
     abstract public function handle(): void;
 
@@ -37,12 +32,12 @@ abstract class AbstractCommand
         return $this;
     }
 
-    public function getOption(string $name): mixed
+    public function getOption(string $name): string|int|null
     {
         foreach ($this->options as $option) {
             if ($option->name === $name) {
                 return match ($option->type) {
-                    InputTypeEnum::STRING => $option->value,
+                    InputTypeEnum::STRING => (string) $option->value,
                     InputTypeEnum::INT => (int) $option->value,
                 };
             }
@@ -55,8 +50,7 @@ abstract class AbstractCommand
     {
         for ($i = 0; $i < $argc; $i += 2) {
             if (isset($argv[$i + 1])) {
-                $option = $this->getInputOptionByShortcut($argv[$i]);
-                if ($option) {
+                if ($option = $this->getInputOptionByShortcut($argv[$i])) {
                     $this->options[$option->name]->value = $argv[$i + 1];
                 }
             }

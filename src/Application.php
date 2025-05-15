@@ -17,6 +17,7 @@ class Application
         /** @var string $commandName */
         $commandName = $argv[1];
         if ($command = $this->commands[$commandName] ?? null) {
+            $command->configure();
             $command->parseArguments($argc, $argv);
             $command->handle();
         } else {
